@@ -76,10 +76,10 @@ fi; \
 $(1)
 endef
 
-verify-package:
+verify-package: package
 	@$(call verify_archive,for executable in server/plugin-linux-amd64 server/plugin-linux-arm64 server/plugin-darwin-amd64 server/plugin-darwin-arm64 server/plugin-windows-amd64.exe; do test -f "$$VERIFY_DIR/$$executable" || { echo "package missing $$executable"; exit 1; }; done)
 
-verify-package-host:
+verify-package-host: package-host
 	@$(call verify_archive,test -f "$$VERIFY_DIR/server/plugin-$$(go env GOOS)-$$(go env GOARCH)$$(go env GOEXE)" || { echo "package missing host executable"; exit 1; })
 
 clean:
