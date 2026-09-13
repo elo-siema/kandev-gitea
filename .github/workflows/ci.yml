@@ -53,9 +53,11 @@ jobs:
         run: |
           make vet
           make test
-      - name: Bundle is up to date
+      - name: Committed bundle matches sources
         working-directory: plugin
-        run: git diff --exit-code -- ui/bundle.js
+        run: |
+          npm run build:ui
+          git diff --exit-code -- ui/bundle.js
       - name: Package all platforms
         working-directory: plugin
         run: make verify-package
