@@ -1,0 +1,63 @@
+id: "kandev-plugin-gitea"
+api_version: 1
+version: "0.1.0"
+min_kandev_version: "0.94.0"
+display_name: "Gitea"
+description: "Connect a Gitea instance to native Kandev repository, branch, pull-request, task-link, review, and composer-reference workflows."
+author: "Michał Flak"
+categories: ["connector"]
+repo_url: "https://github.com/elo-siema/kandev-gitea"
+icon: "assets/icon.svg"
+
+runtime:
+  type: binary
+  executables:
+    linux-amd64: "server/plugin-linux-amd64"
+    linux-arm64: "server/plugin-linux-arm64"
+    darwin-amd64: "server/plugin-darwin-amd64"
+    darwin-arm64: "server/plugin-darwin-arm64"
+    windows-amd64: "server/plugin-windows-amd64.exe"
+
+# api_read: Tasks().Get resolves a task's workspace for link storage and
+# credential checks; Repositories().List resolves attached repositories.
+# state: workspace-scoped task <-> pull-request links.
+capabilities:
+  api_read: ["tasks", "repositories"]
+  state: true
+
+actions:
+  - { key: "repositories.list", scope: "workspace", max_body_bytes: 16384 }
+  - { key: "repositories.inspect", scope: "workspace", max_body_bytes: 16384 }
+  - { key: "repositories.branches", scope: "workspace", max_body_bytes: 16384 }
+  - { key: "change_requests.create", scope: "task", max_body_bytes: 65536 }
+  - { key: "change_requests.get", scope: "task", max_body_bytes: 1024 }
+  - { key: "change_requests.link", scope: "task", max_body_bytes: 16384 }
+  - { key: "change_requests.unlink", scope: "task", max_body_bytes: 4096 }
+  - { key: "change_requests.associations", scope: "workspace", max_body_bytes: 1024 }
+
+repository_providers: ["gitea"]
+
+reference_sources:
+  - source: "gitea_pull_requests"
+    provider: "gitea"
+    kind: "pull_request"
+    display_name: "Gitea pull requests"
+    kind_label: "Pull request"
+    order: 40
+
+ui:
+  bundle: "/ui/bundle.js"
+
+config_schema:
+  type: object
+  required: ["base_url", "token"]
+  properties:
+    base_url:
+      type: string
+      title: "Gitea URL"
+      description: "HTTPS root of the Gitea instance, e.g. https://gitea.example.com (a sub-path such as https://example.com/gitea is supported)."
+    token:
+      type: string
+      title: "Access token"
+      description: "Gitea access token with repository read/write and user read scopes. Used for the API and as the Git push/clone credential."
+      secret: true

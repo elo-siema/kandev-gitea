@@ -1,0 +1,59 @@
+name: Release
+
+# Bump `version` in manifest.yaml and VERSION in Makefile, then push a matching
+# v* tag. The job builds every platform, packs the tarball, and publishes it
+# with its checksums as a GitHub Release.
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    name: Build and publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: plugin
+      - uses: actions/checkout@v5
+        with:
+          repository: kdlbs/kandev
+          path: kandev
+          ref: v0.94.0
+          sparse-checkout: |
+            apps/backend
+            apps/packages/plugin-sdk
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: plugin/go.mod
+          cache-dependency-path: plugin/go.sum
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: plugin/package-lock.json
+      - name: Install UI toolchain
+        working-directory: plugin
+        run: npm ci --ignore-scripts
+      - name: Verify tag matches manifest
+        working-directory: plugin
+        run: |
+          VERSION="$(sed -nE 's/^version: "([0-9]+\.[0-9]+\.[0-9]+)"$/\1/p' manifest.yaml)"
+          test "v$VERSION" = "${GITHUB_REF_NAME}" || { echo "tag ${GITHUB_REF_NAME} != manifest v$VERSION" >&2; exit 1; }
+      - name: Test and package
+        working-directory: plugin
+        run: |
+          make vet
+          make test
+          make verify-package
+          tar -xzf kandev-plugin-gitea-*.tar.gz checksums.txt
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            plugin/kandev-plugin-gitea-*.tar.gz
+            plugin/checksums.txt
+          generate_release_notes: true

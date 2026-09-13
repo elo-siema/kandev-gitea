@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Format, vet, test, package
+    runs-on: ubuntu-latest
+    steps:
+      # go.mod and package.json resolve the Kandev SDK from a sibling checkout.
+      - uses: actions/checkout@v5
+        with:
+          path: plugin
+      - uses: actions/checkout@v5
+        with:
+          repository: kdlbs/kandev
+          path: kandev
+          ref: v0.94.0
+          sparse-checkout: |
+            apps/backend
+            apps/packages/plugin-sdk
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: plugin/go.mod
+          cache-dependency-path: plugin/go.sum
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: plugin/package-lock.json
+      - name: Install UI toolchain
+        working-directory: plugin
+        run: npm ci --ignore-scripts
+      - name: Tidy and format
+        working-directory: plugin
+        run: |
+          go mod tidy
+          git diff --exit-code -- go.mod go.sum
+          test -z "$(gofmt -l .)" || { echo "gofmt needed:"; gofmt -l .; exit 1; }
+      - name: Vet and test
+        working-directory: plugin
+        run: |
+          make vet
+          make test
+      - name: Bundle is up to date
+        working-directory: plugin
+        run: git diff --exit-code -- ui/bundle.js
+      - name: Package all platforms
+        working-directory: plugin
+        run: make verify-package
