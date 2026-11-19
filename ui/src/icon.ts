@@ -1,4 +1,4 @@
-import type { PluginHostApi, PluginIcon } from "@kandev/plugin-sdk";
+import type { PluginHostApi, PluginIcon } from "@kdlbs/plugin-sdk";
 
 /** Teacup glyph in the host's stroke-icon style; the marketplace card uses assets/icon.svg. */
 export function createGiteaIcon(host: PluginHostApi): PluginIcon {

@@ -2,7 +2,7 @@
 // spawns it as a gRPC subprocess; pluginsdk.Serve owns the transport.
 package main
 
-import "github.com/kandev/kandev/pkg/pluginsdk"
+import "github.com/kdlbs/kandev/pluginsdk"
 
 func main() {
 	pluginsdk.Serve(newPlugin())

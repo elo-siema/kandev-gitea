@@ -23,10 +23,10 @@ jobs:
         with:
           repository: kdlbs/kandev
           path: kandev
-          ref: v0.94.0
+          ref: v0.102.0
           sparse-checkout: |
             apps/backend
-            apps/packages/plugin-sdk
+            pluginsdk
       - uses: actions/setup-go@v6
         with:
           go-version-file: plugin/go.mod

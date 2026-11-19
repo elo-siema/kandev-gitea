@@ -1,4 +1,4 @@
-import type { ReviewSummary } from "@kandev/plugin-sdk";
+import type { ReviewSummary } from "@kdlbs/plugin-sdk";
 
 export const PROVIDER_ID = "gitea";
 

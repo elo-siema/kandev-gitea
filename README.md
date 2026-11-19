@@ -18,7 +18,7 @@ The plugin id is `kandev-plugin-gitea`; the provider id is `gitea`.
 
 ## Requirements
 
-- Kandev **0.94.0** or newer (the release this plugin is built and tested
+- Kandev **0.102.0** or newer (the release this plugin is built and tested
   against).
 - A Gitea instance served over **HTTPS**. Kandev only accepts HTTPS provider
   origins and clone URLs. Sub-path installs (`https://example.com/gitea`) work.
@@ -39,12 +39,14 @@ Task ↔ pull-request links are kept in workspace-scoped plugin state.
 
 ## Develop
 
-`go.mod` and `package.json` resolve the Kandev SDK from a sibling checkout,
-exactly like the official template:
+The Kandev SDK comes from the published `github.com/kdlbs/kandev/pluginsdk`
+(Go) and `@kdlbs/plugin-sdk` (npm) packages, both pinned to 0.3.0. Packaging
+additionally needs Kandev's `cmd/plugin-pack`, taken from a sibling checkout
+(or `make package KANDEV_BACKEND=/path/to/kandev/apps/backend`):
 
 ```text
 parent/
-├── kandev/          # https://github.com/kdlbs/kandev at v0.94.0
+├── kandev/          # https://github.com/kdlbs/kandev at v0.102.0
 └── kandev-gitea/    # this repository
 ```
 

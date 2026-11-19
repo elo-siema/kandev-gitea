@@ -5,8 +5,9 @@ BIN := bin/kandev-plugin-gitea
 VERSION := 0.1.0
 STAGE := .build/stage
 PKG_OUT := kandev-plugin-gitea-$(VERSION).tar.gz
-# Sibling kandev checkout providing pkg/pluginsdk (see go.mod replace) and cmd/plugin-pack.
-KANDEV_BACKEND := ../kandev/apps/backend
+# Packaging only: a kandev checkout (v0.102.0+) providing cmd/plugin-pack. The SDK itself
+# comes from the published modules. Override: make package KANDEV_BACKEND=/path/apps/backend
+KANDEV_BACKEND ?= ../kandev/apps/backend
 
 build: build-ui
 	mkdir -p bin
@@ -46,6 +47,7 @@ package: build-ui
 	GOOS=darwin  GOARCH=amd64 go build -o $(STAGE)/server/plugin-darwin-amd64      ./server
 	GOOS=darwin  GOARCH=arm64 go build -o $(STAGE)/server/plugin-darwin-arm64      ./server
 	GOOS=windows GOARCH=amd64 go build -o $(STAGE)/server/plugin-windows-amd64.exe ./server
+	find $(STAGE) -name .DS_Store -delete
 	go -C $(KANDEV_BACKEND) run ./cmd/plugin-pack -dir $(abspath $(STAGE)) -out $(abspath $(PKG_OUT))
 	rm -rf $(STAGE)
 	@echo "Wrote $(PKG_OUT)"
@@ -54,6 +56,7 @@ package: build-ui
 package-host: build-ui
 	$(stage_package)
 	go build -o $(STAGE)/server/plugin-$$(go env GOOS)-$$(go env GOARCH)$$(go env GOEXE) ./server
+	find $(STAGE) -name .DS_Store -delete
 	go -C $(KANDEV_BACKEND) run ./cmd/plugin-pack -dir $(abspath $(STAGE)) -out $(abspath $(PKG_OUT)) -platform-only
 	rm -rf $(STAGE)
 	@echo "Wrote $(PKG_OUT)"

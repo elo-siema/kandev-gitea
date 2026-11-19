@@ -14,10 +14,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/kandev/kandev/pkg/pluginsdk"
+	"github.com/kdlbs/kandev/pluginsdk"
 )
 
-const pageSize = 100
+// pageSize is Gitea's default [api] MAX_RESPONSE_ITEMS: a larger limit is
+// silently clamped, which would make a full page look like the last one.
+const pageSize = 50
 
 // Client is a minimal Gitea REST v1 client. base is the instance root
 // (https://gitea.example.com or https://example.com/gitea, no trailing slash).
@@ -143,6 +145,7 @@ func (c *Client) CurrentUser(ctx context.Context) (User, error) {
 // repositories when query is empty, otherwise a server-side search. The
 // boolean reports whether another page may exist.
 func (c *Client) Repositories(ctx context.Context, query string, page, limit int) ([]Repository, bool, error) {
+	limit = min(limit, pageSize)
 	q := url.Values{"page": {strconv.Itoa(page)}, "limit": {strconv.Itoa(limit)}}
 	var repos []Repository
 	if query == "" {
@@ -176,7 +179,7 @@ func (c *Client) RepositoryByID(ctx context.Context, id int64) (Repository, erro
 
 func (c *Client) Branches(ctx context.Context, owner, name string) ([]Branch, error) {
 	var all []Branch
-	for page := 1; page <= 10; page++ {
+	for page := 1; page <= 20; page++ {
 		var branches []Branch
 		q := url.Values{"page": {strconv.Itoa(page)}, "limit": {strconv.Itoa(pageSize)}}
 		if err := c.get(ctx, repoPath(owner, name)+"/branches", q, &branches); err != nil {

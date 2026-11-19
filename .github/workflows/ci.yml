@@ -18,7 +18,7 @@ jobs:
     name: Format, vet, test, package
     runs-on: ubuntu-latest
     steps:
-      # go.mod and package.json resolve the Kandev SDK from a sibling checkout.
+      # The sibling Kandev checkout only provides cmd/plugin-pack for packaging.
       - uses: actions/checkout@v5
         with:
           path: plugin
@@ -26,10 +26,10 @@ jobs:
         with:
           repository: kdlbs/kandev
           path: kandev
-          ref: v0.94.0
+          ref: v0.102.0
           sparse-checkout: |
             apps/backend
-            apps/packages/plugin-sdk
+            pluginsdk
       - uses: actions/setup-go@v6
         with:
           go-version-file: plugin/go.mod

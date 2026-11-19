@@ -16,7 +16,7 @@ import (
 
 	"kandev-plugin-gitea/internal/sourcecontrol"
 
-	"github.com/kandev/kandev/pkg/pluginsdk"
+	"github.com/kdlbs/kandev/pluginsdk"
 )
 
 const (

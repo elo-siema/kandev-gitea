@@ -1,6 +1,6 @@
 // Frontend half of kandev-plugin-gitea. Bundled by esbuild into ui/bundle.js,
 // which Kandev serves and imports as a native ES module.
-import type { PluginHostApi, PluginRegistry } from "@kandev/plugin-sdk";
+import type { PluginHostApi, PluginRegistry } from "@kdlbs/plugin-sdk";
 import { PROVIDER_ID, parseReference, toChangeRequestDetail } from "./gitea";
 import { createGiteaIcon } from "./icon";
 import { registerSourceControlRecipe, type SourceControlRecipeLifecycle } from "./register";

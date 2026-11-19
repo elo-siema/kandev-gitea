@@ -6,7 +6,7 @@ import (
 	"kandev-plugin-gitea/internal/gitea"
 	"kandev-plugin-gitea/internal/sourcecontrol"
 
-	"github.com/kandev/kandev/pkg/pluginsdk"
+	"github.com/kdlbs/kandev/pluginsdk"
 )
 
 // giteaPlugin wires the provider-neutral recipe to the Gitea adapter and adds

@@ -6,7 +6,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/kandev/kandev/pkg/pluginsdk"
+	"github.com/kdlbs/kandev/pluginsdk"
 	"github.com/stretchr/testify/require"
 )
 
@@ -456,6 +456,18 @@ func TestInspectURLUsesVerifiedWorkspaceAndBindsProviderIdentity(t *testing.T) {
 	require.NotNil(t, body.Repository)
 	require.Equal(t, "acme", body.Repository.ProviderID)
 	require.Equal(t, inspected.RepositoryID, body.Repository.RepositoryID)
+	require.Contains(t, string(response.Body), `"provider_repository_id":"immutable-repository-9"`)
+}
+
+func TestInspectURLReportsUnownedURLAsNotMatched(t *testing.T) {
+	extension := &Extension{ProviderID: "acme", RepositoryDetails: &repositoryDetailsStub{}}
+	response, err := extension.HandleAction(context.Background(), &pluginsdk.PluginActionRequest{
+		ActionKey: ActionRepositoriesInspect,
+		Context:   pluginsdk.VerifiedActionContext{WorkspaceID: "workspace-1"},
+		Body:      []byte(`{"url":"https://elsewhere.example/a/b"}`),
+	})
+	require.NoError(t, err)
+	require.JSONEq(t, `{"matched":false,"repository":null}`, string(response.Body))
 }
 
 func TestBranchesResolveStoredImmutableIdentityBeforeProviderIO(t *testing.T) {

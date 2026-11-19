@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/kandev/kandev/pkg/pluginsdk"
+	"github.com/kdlbs/kandev/pluginsdk"
 )
 
 const (
@@ -36,6 +36,16 @@ type Repository struct {
 	Name            string `json:"name"`
 	CloneURL        string `json:"clone_url"`
 	DefaultBranch   string `json:"default_branch,omitempty"`
+}
+
+// MarshalJSON also emits provider_repository_id: Kandev's backend validates
+// inspect descriptors by that key, while the browser recipe reads repository_id.
+func (r Repository) MarshalJSON() ([]byte, error) {
+	type plain Repository
+	return json.Marshal(struct {
+		plain
+		ProviderRepositoryID string `json:"provider_repository_id"`
+	}{plain(r), r.RepositoryID})
 }
 
 type RepositoryIdentity struct {
@@ -335,7 +345,8 @@ func (e *Extension) inspectRepository(ctx context.Context, request *pluginsdk.Pl
 		return nil, fmt.Errorf("source-control recipe: inspect repository URL: %w", err)
 	}
 	if repository == nil {
-		return jsonResponse(map[string]any{"repository": nil})
+		// Kandev's backend treats only an explicit matched:false as "not owned".
+		return jsonResponse(map[string]any{"matched": false, "repository": nil})
 	}
 	bound := *repository
 	bound.ProviderID = e.ProviderID
